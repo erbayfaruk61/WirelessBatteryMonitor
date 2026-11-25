@@ -15,7 +15,9 @@
 ## 📸 Ekran Görüntüleri
 
 <p align="center">
-  <img src="docs/flyout.png" width="420" alt="Kablosuz Pil İzleyici Flyout Paneli">
+  <img src="docs/flyout.png" width="380" alt="Kablosuz Pil İzleyici Flyout Paneli">
+  &nbsp;&nbsp;
+  <img src="docs/settings.png" width="380" alt="Uygulama İçi Ayarlar Paneli">
 </p>
 
 <p align="center">
