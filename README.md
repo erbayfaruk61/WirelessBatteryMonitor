@@ -21,7 +21,7 @@
 </p>
 
 <p align="center">
-  <img src="docs/taskbar.png" alt="Görev Çubuğu Pil Widget'ı">
+  <img src="docs/taskbar-widget.png" alt="Görev Çubuğu Pil Widget'ı">
 </p>
 
 ---
