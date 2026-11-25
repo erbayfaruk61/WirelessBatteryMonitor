@@ -5,8 +5,13 @@
 **Windows 10 & 11 için hafif, üretici yazılımı (bloatware) gerektirmeyen görev çubuğu pil göstergesi ve modern açılır kontrol paneli.**
 
 [![Platform](https://img.shields.io/badge/Platform-Windows%2010%20%7C%2011%20(x64)-0078D4?logo=windows)](https://github.com/erbayfaruk61/WirelessBatteryMonitor)
+[![Release](https://img.shields.io/github/v/release/erbayfaruk61/WirelessBatteryMonitor?label=Release&color=2ea44f)](https://github.com/erbayfaruk61/WirelessBatteryMonitor/releases/latest)
 [![.NET](https://img.shields.io/badge/.NET-9.0-512BD4?logo=dotnet)](https://dotnet.microsoft.com/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+
+<br>
+
+[**🚀 En Son Sürümü İndir (Releases)**](https://github.com/erbayfaruk61/WirelessBatteryMonitor/releases/latest)
 
 </div>
 
@@ -62,27 +67,15 @@
 
 ---
 
-## 🛠️ Kurulum ve Geliştirme
+## 🚀 İndirme ve Kullanım
 
-### Gereksinimler
-- Windows 10 / 11 (x64)
-- [.NET 9 SDK](https://dotnet.microsoft.com/download/dotnet/9.0) (veya çalıştırmak için .NET 9 Desktop Runtime)
+Doğrudan kullanmak için herhangi bir geliştirme ortamı kurmanıza gerek yoktur:
 
-### Kaynaktan Derleme ve Çalıştırma
-```powershell
-git clone https://github.com/erbayfaruk61/WirelessBatteryMonitor.git
-cd WirelessBatteryMonitor
-dotnet run --configuration Release
-```
+1. [**Releases**](https://github.com/erbayfaruk61/WirelessBatteryMonitor/releases/latest) sayfasından en son sürümü indirin:
+   - `WirelessBatteryMonitor.exe` (Doğrudan çalışan tek dosya) veya `WirelessBatteryMonitor-portable.zip`.
+2. Dosyayı çalıştırın. Uygulama sistem tepsisinde ve görev çubuğunda saatin solunda açılacaktır.
 
-### Taşınabilir Tek Dosya (`.exe`) Üretme
-```powershell
-.\publish.ps1
-```
-Çıktı `dist\portable\WirelessBatteryMonitor.exe` konumunda oluşturulur.
-
-### Kurulum Sihirbazı (Inno Setup)
-`publish.ps1` çalıştırıldıktan sonra [installer.iss](installer.iss) dosyasını Inno Setup ile derleyerek `WirelessBatteryMonitor-Setup.exe` üretebilirsiniz.
+---
 
 ---
 

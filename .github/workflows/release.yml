@@ -1,0 +1,46 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '9.0.x'
+
+      - name: Publish Single File
+        run: |
+          dotnet publish WirelessBatteryMonitor.csproj -c Release -r win-x64 --self-contained false -p:PublishSingleFile=true -o dist/portable
+
+      - name: Create Portable Zip
+        run: |
+          Compress-Archive -Path dist/portable/WirelessBatteryMonitor.exe -DestinationPath dist/WirelessBatteryMonitor-portable.zip -Force
+
+      - name: Build Inno Setup Installer
+        uses: Minionguyjpro/Inno-Setup-Action@v1.2.2
+        with:
+          path: installer.iss
+        continue-on-error: true
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            dist/portable/WirelessBatteryMonitor.exe
+            dist/WirelessBatteryMonitor-portable.zip
+            dist/installer/WirelessBatteryMonitor-Setup.exe
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
