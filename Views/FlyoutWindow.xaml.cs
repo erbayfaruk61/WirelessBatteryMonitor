@@ -47,6 +47,7 @@ public partial class FlyoutWindow : Window
     {
         _settings = settings;
         _monitor = monitor;
+        _isLoadingSettings = true;
         InitializeComponent();
         LoadSettingsUi();
         SizeChanged += (_, _) =>
@@ -147,9 +148,13 @@ public partial class FlyoutWindow : Window
         PollIntervalLabel.Text = $"Yenileme Sıklığı: {s.PollIntervalSeconds} sn";
 
         LowThresholdSlider.Value = s.LowBatteryThreshold;
-        LowThresholdLabel.Text = $"Düşük Pil Uyarı Eşiği: %{s.LowBatteryThreshold}";
+        LowThresholdLabel.Text = $"Düşük Eşik: %{s.LowBatteryThreshold}";
+
+        CriticalThresholdSlider.Value = s.CriticalBatteryThreshold;
+        CriticalThresholdLabel.Text = $"Kritik Eşik: %{s.CriticalBatteryThreshold}";
 
         NotificationsCheck.IsChecked = s.EnableLowBatteryNotifications;
+        TrayIconCheck.IsChecked = s.ShowTrayIcon;
         TaskbarWidgetCheck.IsChecked = s.ShowTaskbarWidget;
         AllMonitorsCheck.IsChecked = s.ShowOnAllMonitors;
         ShowDisconnectedCheck.IsChecked = s.ShowDisconnectedDevices;
@@ -332,8 +337,19 @@ public partial class FlyoutWindow : Window
     {
         if (_isLoadingSettings) return;
         int val = (int)e.NewValue;
-        LowThresholdLabel.Text = $"Düşük Pil Uyarı Eşiği: %{val}";
+        LowThresholdLabel.Text = $"Düşük Eşik: %{val}";
         _settings.Current.LowBatteryThreshold = val;
+        _settings.Save();
+        UpdateDevices(_monitor.CurrentDevices);
+        SettingsChanged?.Invoke();
+    }
+
+    private void CriticalThresholdSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+    {
+        if (_isLoadingSettings) return;
+        int val = (int)e.NewValue;
+        CriticalThresholdLabel.Text = $"Kritik Eşik: %{val}";
+        _settings.Current.CriticalBatteryThreshold = val;
         _settings.Save();
         UpdateDevices(_monitor.CurrentDevices);
         SettingsChanged?.Invoke();
@@ -344,7 +360,18 @@ public partial class FlyoutWindow : Window
         if (_isLoadingSettings) return;
         var s = _settings.Current;
         s.EnableLowBatteryNotifications = NotificationsCheck.IsChecked == true;
+        s.ShowTrayIcon = TrayIconCheck.IsChecked == true;
         s.ShowTaskbarWidget = TaskbarWidgetCheck.IsChecked == true;
+
+        // Uygulamaya erişimin tamamen kaybolmaması için en az biri görünür kalsın
+        if (!s.ShowTrayIcon && !s.ShowTaskbarWidget)
+        {
+            s.ShowTaskbarWidget = true;
+            _isLoadingSettings = true;
+            TaskbarWidgetCheck.IsChecked = true;
+            _isLoadingSettings = false;
+        }
+
         s.ShowOnAllMonitors = AllMonitorsCheck.IsChecked == true;
         s.ShowDisconnectedDevices = ShowDisconnectedCheck.IsChecked == true;
         s.RememberLastCharge = RememberChargeCheck.IsChecked == true;

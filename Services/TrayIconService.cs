@@ -61,6 +61,8 @@ public sealed class TrayIconService : IDisposable
 
     public void UpdateWidgetChecked(bool isChecked) => _toggleWidgetItem.Checked = isChecked;
 
+    public void SetVisible(bool visible) => _notifyIcon.Visible = visible;
+
     public void UpdateStatus(IReadOnlyList<DeviceBatteryInfo> devices, int lowThreshold)
     {
         var connected = devices.Where(d => d.IsConnected && d.Percent.HasValue).ToList();
@@ -86,6 +88,15 @@ public sealed class TrayIconService : IDisposable
             "Düşük Pil Uyarısı",
             $"{device.Name} pil seviyesi {device.DisplayPercentText} seviyesine düştü.",
             ToolTipIcon.Warning);
+    }
+
+    public void ShowCriticalBatteryAlert(DeviceBatteryInfo device)
+    {
+        _notifyIcon.ShowBalloonTip(
+            7000,
+            "Kritik Pil Uyarısı!",
+            $"{device.Name} kritik pil seviyesinde ({device.DisplayPercentText})! Lütfen şarj edin.",
+            ToolTipIcon.Error);
     }
 
     public void ShowContextMenuAtCursor()

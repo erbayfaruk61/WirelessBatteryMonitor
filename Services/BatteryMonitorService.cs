@@ -22,6 +22,7 @@ public sealed class BatteryMonitorService : IDisposable
 
     private readonly Dictionary<string, DeviceBatteryInfo> _trackedDevices = new();
     private readonly HashSet<string> _notifiedLowKeys = [];
+    private readonly HashSet<string> _notifiedCriticalKeys = [];
     private readonly SemaphoreSlim _pollLock = new(1, 1);
 
     private CancellationTokenSource? _cts;
@@ -29,6 +30,7 @@ public sealed class BatteryMonitorService : IDisposable
 
     public event Action<IReadOnlyList<DeviceBatteryInfo>>? DevicesUpdated;
     public event Action<DeviceBatteryInfo>? LowBatteryDetected;
+    public event Action<DeviceBatteryInfo>? CriticalBatteryDetected;
 
     public IReadOnlyList<DeviceBatteryInfo> CurrentDevices =>
         _trackedDevices.Values
@@ -181,18 +183,32 @@ public sealed class BatteryMonitorService : IDisposable
                 };
 
                 int threshold = _settings.Current.GetEffectiveLowThreshold(key);
+                int criticalThreshold = _settings.Current.CriticalBatteryThreshold;
                 if (_settings.Current.EnableLowBatteryNotifications &&
                     current.IsConnected &&
                     !current.IsCharging &&
-                    current.Percent.HasValue &&
-                    current.Percent.Value <= threshold)
+                    current.Percent.HasValue)
                 {
-                    if (_notifiedLowKeys.Add(key))
-                        LowBatteryDetected?.Invoke(current);
+                    int pct = current.Percent.Value;
+                    if (pct <= criticalThreshold)
+                    {
+                        if (_notifiedCriticalKeys.Add(key))
+                            CriticalBatteryDetected?.Invoke(current);
+                    }
+                    else if (pct <= threshold)
+                    {
+                        if (_notifiedLowKeys.Add(key))
+                            LowBatteryDetected?.Invoke(current);
+                    }
                 }
-                else if (current.IsCharging || (current.Percent.HasValue && current.Percent.Value > threshold + 5))
+
+                if (current.IsCharging || (current.Percent.HasValue && current.Percent.Value > threshold + 5))
                 {
                     _notifiedLowKeys.Remove(key);
+                }
+                if (current.IsCharging || (current.Percent.HasValue && current.Percent.Value > criticalThreshold + 5))
+                {
+                    _notifiedCriticalKeys.Remove(key);
                 }
             }
 

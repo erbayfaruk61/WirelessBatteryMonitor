@@ -26,6 +26,26 @@
             <ItemsControl.ItemTemplate>
                 <DataTemplate>
                     <StackPanel Orientation="Horizontal" Margin="5,0" VerticalAlignment="Center" ToolTip="{Binding TooltipText}">
+                        <StackPanel.Style>
+                            <Style TargetType="StackPanel">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsCritical}" Value="True">
+                                        <DataTrigger.EnterActions>
+                                            <BeginStoryboard x:Name="BlinkStoryboard">
+                                                <Storyboard RepeatBehavior="Forever" AutoReverse="True">
+                                                    <DoubleAnimation Storyboard.TargetProperty="Opacity"
+                                                                     From="1.0" To="0.2"
+                                                                     Duration="0:0:0.6" />
+                                                </Storyboard>
+                                            </BeginStoryboard>
+                                        </DataTrigger.EnterActions>
+                                        <DataTrigger.ExitActions>
+                                            <StopStoryboard BeginStoryboardName="BlinkStoryboard" />
+                                        </DataTrigger.ExitActions>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </StackPanel.Style>
                         <TextBlock Text="{Binding Glyph}"
                                    FontFamily="Segoe MDL2 Assets"
                                    FontSize="13"

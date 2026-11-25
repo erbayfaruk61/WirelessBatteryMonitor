@@ -18,6 +18,10 @@ public static class AppConstants
     public const int MinLowBatteryThreshold = 5;
     public const int MaxLowBatteryThreshold = 50;
 
+    public const int DefaultCriticalBatteryThreshold = 10;
+    public const int MinCriticalBatteryThreshold = 5;
+    public const int MaxCriticalBatteryThreshold = 30;
+
     public const int MaxHistoryPoints = 30;
     public const int HidTimeoutMs = 450;
 

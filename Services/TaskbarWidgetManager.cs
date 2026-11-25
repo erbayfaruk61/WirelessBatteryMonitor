@@ -1,5 +1,6 @@
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Windows.Threading;
 using WirelessBatteryMonitor.Models;
 using WirelessBatteryMonitor.Views;
 
@@ -22,9 +23,27 @@ public sealed class TaskbarWidgetManager : IDisposable
     private static extern bool IsWindowVisible(nint hWnd);
 
     private readonly Dictionary<nint, TaskbarWidgetWindow> _widgets = new();
+    private readonly DispatcherTimer _zOrderTimer;
 
     public event Action? LeftClicked;
     public event Action? RightClicked;
+
+    public TaskbarWidgetManager()
+    {
+        _zOrderTimer = new DispatcherTimer
+        {
+            Interval = TimeSpan.FromSeconds(1.5)
+        };
+        _zOrderTimer.Tick += (_, _) =>
+        {
+            foreach (var widget in _widgets.Values)
+            {
+                if (widget.IsVisible)
+                    widget.EnsureTopmostZOrder();
+            }
+        };
+        _zOrderTimer.Start();
+    }
 
     public void Sync(IReadOnlyList<DeviceBatteryInfo> devices, AppSettings settings)
     {
@@ -60,6 +79,7 @@ public sealed class TaskbarWidgetManager : IDisposable
             if (!widget.IsVisible)
                 widget.Show();
             widget.PositionForAssignedTaskbar();
+            widget.EnsureTopmostZOrder();
         }
     }
 
@@ -91,6 +111,7 @@ public sealed class TaskbarWidgetManager : IDisposable
 
     public void Dispose()
     {
+        _zOrderTimer.Stop();
         foreach (var widget in _widgets.Values)
             widget.Close();
         _widgets.Clear();

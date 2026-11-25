@@ -17,6 +17,7 @@ public sealed class TaskbarDeviceItemVm
     public required System.Windows.Media.Brush TextBrush { get; init; }
     public required string ChargingIcon { get; init; }
     public required Visibility ChargingVisibility { get; init; }
+    public bool IsCritical { get; init; }
 }
 
 public partial class TaskbarWidgetWindow : Window
@@ -46,6 +47,16 @@ public partial class TaskbarWidgetWindow : Window
     [DllImport("user32.dll")]
     private static extern int SetWindowLong(nint hWnd, int nIndex, int dwNewLong);
 
+    [DllImport("user32.dll", SetLastError = true)]
+    private static extern bool SetWindowPos(nint hWnd, nint hWndInsertAfter, int X, int Y, int cx, int cy, uint uFlags);
+
+    private static readonly nint HwndTopmost = new(-1);
+    private const uint SwpNoSize = 0x0001;
+    private const uint SwpNoMove = 0x0002;
+    private const uint SwpNoActivate = 0x0010;
+    private const uint SwpShowWindow = 0x0040;
+
+    private nint _hwnd;
     private nint _targetTaskbarHwnd;
     private bool _isPrimaryTaskbar = true;
 
@@ -61,10 +72,17 @@ public partial class TaskbarWidgetWindow : Window
 
     private void OnSourceInitialized(object? sender, EventArgs e)
     {
-        var hwnd = new WindowInteropHelper(this).Handle;
-        int exStyle = GetWindowLong(hwnd, GwlExStyle);
-        SetWindowLong(hwnd, GwlExStyle, exStyle | WsExToolWindow | WsExNoActivate);
+        _hwnd = new WindowInteropHelper(this).Handle;
+        int exStyle = GetWindowLong(_hwnd, GwlExStyle);
+        SetWindowLong(_hwnd, GwlExStyle, exStyle | WsExToolWindow | WsExNoActivate);
         PositionForAssignedTaskbar();
+        EnsureTopmostZOrder();
+    }
+
+    public void EnsureTopmostZOrder()
+    {
+        if (_hwnd == nint.Zero || !IsVisible) return;
+        SetWindowPos(_hwnd, HwndTopmost, 0, 0, 0, 0, SwpNoMove | SwpNoSize | SwpNoActivate | SwpShowWindow);
     }
 
     public void AssignTaskbar(nint taskbarHwnd, bool isPrimary)
@@ -104,7 +122,8 @@ public partial class TaskbarWidgetWindow : Window
             {
                 string displayName = settings.GetEffectiveName(d.Key, d.Name);
                 int threshold = settings.GetEffectiveLowThreshold(d.Key);
-                var color = GetStatusColor(d, threshold);
+                bool isCritical = d.IsConnected && !d.IsCharging && d.Percent.HasValue && d.Percent.Value <= settings.CriticalBatteryThreshold;
+                var color = GetStatusColor(d, threshold, isCritical);
                 var brush = new SolidColorBrush(color);
 
                 string subLine = settings.ShowSubBatteries && d.SubBatteries.Count > 0
@@ -117,9 +136,12 @@ public partial class TaskbarWidgetWindow : Window
                     PercentText = d.DisplayPercentText,
                     TooltipText = $"{displayName}\n{d.DisplayPercentText} · {d.StatusSummary}{subLine}\nBağlantı: {d.ConnectionVia}\nSon okuma: {d.LastUpdated:HH:mm:ss}",
                     AccentBrush = brush,
-                    TextBrush = d.IsConnected ? System.Windows.Media.Brushes.White : System.Windows.Media.Brushes.DarkGray,
+                    TextBrush = isCritical
+                        ? brush
+                        : (d.IsConnected ? System.Windows.Media.Brushes.White : System.Windows.Media.Brushes.DarkGray),
                     ChargingIcon = "⚡",
-                    ChargingVisibility = d.IsCharging ? Visibility.Visible : Visibility.Collapsed
+                    ChargingVisibility = d.IsCharging ? Visibility.Visible : Visibility.Collapsed,
+                    IsCritical = isCritical
                 };
             }).ToList();
         }
@@ -172,12 +194,13 @@ public partial class TaskbarWidgetWindow : Window
         }
     }
 
-    private static System.Windows.Media.Color GetStatusColor(DeviceBatteryInfo d, int lowThreshold)
+    private static System.Windows.Media.Color GetStatusColor(DeviceBatteryInfo d, int lowThreshold, bool isCritical)
     {
         if (!d.IsConnected) return System.Windows.Media.Color.FromRgb(140, 145, 155);
         if (d.IsCharging) return System.Windows.Media.Color.FromRgb(96, 165, 250);
+        if (isCritical) return System.Windows.Media.Color.FromRgb(239, 68, 68);
         if (d.Percent.HasValue && d.Percent.Value <= lowThreshold)
-            return System.Windows.Media.Color.FromRgb(239, 68, 68);
+            return System.Windows.Media.Color.FromRgb(245, 158, 11);
         return System.Windows.Media.Color.FromRgb(52, 211, 153);
     }
 

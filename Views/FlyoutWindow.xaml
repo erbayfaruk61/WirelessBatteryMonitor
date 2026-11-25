@@ -232,11 +232,27 @@
                     <Slider x:Name="PollIntervalSlider" Minimum="5" Maximum="120" TickFrequency="5" IsSnapToTickEnabled="True"
                             Margin="0,4,0,8" ValueChanged="PollIntervalSlider_ValueChanged" />
 
-                    <TextBlock x:Name="LowThresholdLabel" Text="Düşük Pil Uyarı Eşiği: %30" Foreground="#D1D5DB" FontSize="12" />
-                    <Slider x:Name="LowThresholdSlider" Minimum="5" Maximum="50" TickFrequency="5" IsSnapToTickEnabled="True"
-                            Margin="0,4,0,10" ValueChanged="LowThresholdSlider_ValueChanged" />
+                    <Grid Margin="0,0,0,10">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="12" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0">
+                            <TextBlock x:Name="LowThresholdLabel" Text="Düşük Eşik: %30" Foreground="#D1D5DB" FontSize="11.5" />
+                            <Slider x:Name="LowThresholdSlider" Minimum="5" Maximum="50" TickFrequency="5" IsSnapToTickEnabled="True"
+                                    Margin="0,4,0,0" ValueChanged="LowThresholdSlider_ValueChanged" />
+                        </StackPanel>
+                        <StackPanel Grid.Column="2">
+                            <TextBlock x:Name="CriticalThresholdLabel" Text="Kritik Eşik: %10" Foreground="#FCA5A5" FontSize="11.5" />
+                            <Slider x:Name="CriticalThresholdSlider" Minimum="5" Maximum="30" TickFrequency="5" IsSnapToTickEnabled="True"
+                                    Margin="0,4,0,0" ValueChanged="CriticalThresholdSlider_ValueChanged" />
+                        </StackPanel>
+                    </Grid>
 
                     <CheckBox x:Name="NotificationsCheck" Content="Düşük pilde Windows bildirimi gönder"
+                              Foreground="#E5E7EB" Margin="0,0,0,6" Checked="SettingCheck_Changed" Unchecked="SettingCheck_Changed" />
+                    <CheckBox x:Name="TrayIconCheck" Content="Sistem tepsisi pil simgesini göster"
                               Foreground="#E5E7EB" Margin="0,0,0,6" Checked="SettingCheck_Changed" Unchecked="SettingCheck_Changed" />
                     <CheckBox x:Name="TaskbarWidgetCheck" Content="Görev çubuğu widget'ını göster"
                               Foreground="#E5E7EB" Margin="0,0,0,6" Checked="SettingCheck_Changed" Unchecked="SettingCheck_Changed" />

@@ -67,6 +67,11 @@ public partial class App : System.Windows.Application
             _trayIcon.ShowLowBatteryAlert(device);
         });
 
+        _monitor.CriticalBatteryDetected += device => Dispatcher.Invoke(() =>
+        {
+            _trayIcon.ShowCriticalBatteryAlert(device);
+        });
+
         ApplySettingsVisibility();
         _monitor.Start();
     }
@@ -84,6 +89,7 @@ public partial class App : System.Windows.Application
         if (_settings is null || _widgetManager is null || _trayIcon is null || _monitor is null) return;
 
         bool show = _settings.Current.ShowTaskbarWidget;
+        _trayIcon.SetVisible(_settings.Current.ShowTrayIcon);
         _trayIcon.UpdateWidgetChecked(show);
         _widgetManager.Sync(_monitor.CurrentDevices, _settings.Current);
     }

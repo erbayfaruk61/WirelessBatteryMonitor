@@ -28,7 +28,9 @@ public sealed class AppSettings
 {
     public int PollIntervalSeconds { get; set; } = AppConstants.DefaultPollIntervalSeconds;
     public int LowBatteryThreshold { get; set; } = AppConstants.DefaultLowBatteryThreshold;
+    public int CriticalBatteryThreshold { get; set; } = AppConstants.DefaultCriticalBatteryThreshold;
     public bool EnableLowBatteryNotifications { get; set; } = true;
+    public bool ShowTrayIcon { get; set; } = true;
     public bool ShowTaskbarWidget { get; set; } = true;
     public bool ShowOnAllMonitors { get; set; } = true;
     public bool ShowDisconnectedDevices { get; set; } = true;
@@ -99,6 +101,10 @@ public sealed class SettingsService
                         loaded.LowBatteryThreshold,
                         AppConstants.MinLowBatteryThreshold,
                         AppConstants.MaxLowBatteryThreshold);
+                    loaded.CriticalBatteryThreshold = Math.Clamp(
+                        loaded.CriticalBatteryThreshold,
+                        AppConstants.MinCriticalBatteryThreshold,
+                        AppConstants.MaxCriticalBatteryThreshold);
                     loaded.EnabledReaders ??= new EnabledReadersSettings();
                     loaded.HiddenDeviceKeys ??= [];
                     loaded.HiddenFromPanelKeys ??= [];
